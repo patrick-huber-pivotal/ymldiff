@@ -3,7 +3,9 @@ package formatters
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/patrick-huber-pivotal/ymldiff/diff"
 	"gopkg.in/yaml.v2"
@@ -21,8 +23,24 @@ func NewBOSH(changeLog *diff.ChangeLog) Formatter {
 }
 
 func (f *bosh) Write(out io.Writer) error {
+
+	// sort the slice first to line up like paths
+	sort.Slice(f.changeLog.Differences, func(i, j int) bool {
+		first := f.changeLog.Differences[i]
+		second := f.changeLog.Differences[j]
+		firstPath := strings.Join(first.Path, "/")
+		secondPath := strings.Join(second.Path, "/")
+		return firstPath < secondPath
+	})
+
 	shift := 0
+	previousPathPrefix := ""
 	for _, c := range f.changeLog.Differences {
+		currentPathPrefix := strings.Join(c.Path[:len(c.Path)-1], "/")
+		if previousPathPrefix != currentPathPrefix {
+			shift = 0
+			previousPathPrefix = currentPathPrefix
+		}
 		var err error
 		shift, err = f.writeChange(&c, out, shift)
 		if err != nil {

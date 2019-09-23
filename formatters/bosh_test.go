@@ -78,10 +78,57 @@ var _ = Describe("Yaml", func() {
 			tester.Equal(from, to, expected)
 		})
 
-		It("handles utf-8 characters", func() {
-			from := "currency: €"
-			to := "currency: €"
-			var expected interface{}
+		It("shows proper offsets from two different arrays", func() {
+			from := map[string]interface{}{
+				"first": []string{
+					"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+				},
+				"second": []string{
+					"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+				},
+			}
+			to := map[string]interface{}{
+				"first": []string{
+					"one", "two", "three", "four", "seven", "ten",
+				},
+				"second": []string{
+					"one", "two", "three", "four", "seven", "ten",
+				},
+			}
+			expected := []interface{}{
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/first/4",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/first/4",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/first/5",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/first/5",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/second/4",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/second/4",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/second/5",
+				},
+				map[interface{}]interface{}{
+					"type": "remove",
+					"path": "/second/5",
+				},
+			}
 			tester.Equal(from, to, expected)
 		})
 	})
