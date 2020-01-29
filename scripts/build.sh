@@ -15,7 +15,7 @@ export CGO_ENABLED=0
 go build -o "$BINDIR/ymldiff-windows-amd64.exe" "$DIR/../main.go"
 
 # build linux
-export GOOS=windows
+export GOOS=linux
 export GOARCH=amd64
 export CGO_ENABLED=0
 

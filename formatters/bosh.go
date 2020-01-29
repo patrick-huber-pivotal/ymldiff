@@ -1,6 +1,8 @@
 package formatters
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"sort"
@@ -72,13 +74,31 @@ func (f *bosh) writeAdd(change *diff.Change, out io.Writer) error {
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "  path: %s", f.createAddPath(change.Path))
 	fmt.Fprintln(out)
+	fmt.Fprint(out, "  value:")
 	bytes, err := yaml.Marshal(change.To)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "  value:")
-	fmt.Fprintf(out, "    %s", string(bytes))
+	lines, err := f.toLines(bytes)
+	if err != nil {
+		return err
+	}
+	for _, line := range lines {
+		fmt.Fprintln(out)
+		fmt.Fprintf(out, "    %s", line)
+	}
+	fmt.Fprintln(out)
 	return nil
+}
+
+func (f *bosh) toLines(buffer []byte) (lines []string, err error) {
+	r := bytes.NewReader(buffer)
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	err = scanner.Err()
+	return
 }
 
 func (f *bosh) writeRemove(change *diff.Change, out io.Writer, shift int) error {
@@ -94,12 +114,20 @@ func (f *bosh) writeModify(change *diff.Change, out io.Writer) error {
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, "  path: %s", f.createAddPath(change.Path))
 	fmt.Fprintln(out)
+	fmt.Fprint(out, "  value:")
 	bytes, err := yaml.Marshal(change.To)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(out, "  value:")
-	fmt.Fprintf(out, "    %s", string(bytes))
+	lines, err := f.toLines(bytes)
+	if err != nil {
+		return err
+	}
+	for _, line := range lines {
+		fmt.Fprintln(out)
+		fmt.Fprintf(out, "    %s", line)
+	}
+	fmt.Fprintln(out)
 	return nil
 }
 

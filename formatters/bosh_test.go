@@ -23,6 +23,32 @@ var _ = Describe("Yaml", func() {
 		tester = NewBoshTest()
 	})
 	Describe("Write", func() {
+		It("aligns child objects", func() {
+			from := map[interface{}]interface{}{
+				"product-properties": map[interface{}]interface{}{},
+			}
+			to := map[interface{}]interface{}{
+				"product-properties": map[interface{}]interface{}{
+					".cloud_controller.encrypt_key": map[interface{}]interface{}{
+						"value": map[interface{}]interface{}{
+							"secret": "((cloud_controller_encrypt_key.secret))",
+						},
+					},
+				},
+			}
+			expected := []interface{}{
+				map[interface{}]interface{}{
+					"type": "replace",
+					"path": "/product-properties/.cloud_controller.encrypt_key?",
+					"value": map[interface{}]interface{}{
+						"value": map[interface{}]interface{}{
+							"secret": "((cloud_controller_encrypt_key.secret))",
+						},
+					},
+				},
+			}
+			tester.Equal(from, to, expected)
+		})
 		It("shows items added to array", func() {
 
 			from := []string{"one", "two", "three", "four", "seven", "ten"}
